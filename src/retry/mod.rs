@@ -2,8 +2,8 @@ mod stream;
 
 pub mod policy;
 
-use stream::Stream;
 use core::time::Duration;
+use stream::Stream;
 use tokio::time::sleep;
 
 pub enum Decision<Response> {

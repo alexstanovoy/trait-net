@@ -1,5 +1,5 @@
-use core::{ops::Range, time::Duration};
 use super::{Decision, Policy};
+use core::{ops::Range, time::Duration};
 
 pub struct Once;
 
@@ -15,12 +15,12 @@ impl<Response> Policy<Response, Response> for Once {
     }
 }
 
-pub struct Fixed {
+pub struct RetryOnError {
     counter: Range<usize>,
     delay: Duration,
 }
 
-impl Fixed {
+impl RetryOnError {
     pub fn new(retry_count: usize, delay: Duration) -> Self {
         Self {
             counter: 0..retry_count,
@@ -29,9 +29,11 @@ impl Fixed {
     }
 }
 
-impl<Response> Policy<Response, Response> for Fixed {
-    fn decide(&mut self, response: Response) -> Decision<Response> {
-        if self.counter.next().is_some() {
+impl<Response, Error> Policy<Result<Response, Error>, Result<Response, Error>> for RetryOnError {
+    fn decide(&mut self, response: Result<Response, Error>) -> Decision<Result<Response, Error>> {
+        if response.is_ok() {
+            Decision::Break(response)
+        } else if self.counter.next().is_some() {
             Decision::Retry(self.delay)
         } else {
             Decision::Break(response)
