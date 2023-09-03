@@ -1,17 +1,17 @@
 [package]
 name = "trait-net"
-description = "A collection of traits for client libraries"
+description = "A collection of traits for client libraries for reducing boilerplate"
 license = "MIT"
 readme = "README.md"
 version = "0.1.0"
 authors = ["Alexander Stanovoy <alex.stanovoy@gmail.com>"]
 edition = "2021"
 repository = "https://github.com/alexstanovoy/trait-net"
-keywords = ["web", "http", "client", "trait"]
+keywords = ["web", "net", "trait", "http", "client", "tokio", "retry", "metrics"]
 
 [dependencies]
 async-trait = "0.1"
-tokio = { version = "1.32", features = ["time"] }
+tokio = { version = "1.32", features = ["time"], optional = true }
 prometheus = { version = "0.13", optional = true }
 
 [dev-dependencies]
@@ -20,4 +20,5 @@ reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 
 [features]
+tokio = ["dep:tokio"]
 prometheus = ["dep:prometheus"]

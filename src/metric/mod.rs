@@ -1,50 +1,76 @@
 mod future_ext;
-// mod tuple;
-#[cfg(test)]
-mod tests;
 #[cfg(feature = "prometheus")]
 pub mod prometheus;
+#[cfg(test)]
+mod tests;
 
 pub use future_ext::MetricsFutureExt;
 
-pub trait ScopedMetric {
-    type Guard: Observation;
-    fn observation(&self, labels: &[&str]) -> Self::Guard;
+pub trait Observer {
+    fn start(&mut self);
+    fn stop(&mut self);
+    fn record<Output>(&mut self, output: &Output);
 }
 
-pub trait Observation {
-    fn start(&self);
-}
-
-impl<T1> Observation for (T1,)
+impl<O1> Observer for (O1,)
 where
-    T1: Observation,
+    O1: Observer,
 {
-    fn start(&self) {
+    fn start(&mut self) {
         self.0.start();
+    }
+
+    fn stop(&mut self) {
+        self.0.stop();
+    }
+
+    fn record<T>(&mut self, output: &T) {
+        self.0.record(output);
     }
 }
 
-impl<T1, T2> Observation for (T1, T2)
+impl<O1, O2> Observer for (O1, O2)
 where
-    T1: Observation,
-    T2: Observation,
+    O1: Observer,
+    O2: Observer,
 {
-    fn start(&self) {
+    fn start(&mut self) {
         self.0.start();
         self.1.start();
     }
+
+    fn stop(&mut self) {
+        self.1.stop();
+        self.0.stop();
+    }
+
+    fn record<T>(&mut self, output: &T) {
+        self.0.record(output);
+        self.1.record(output);
+    }
 }
 
-impl<T1, T2, T3> Observation for (T1, T2, T3)
+impl<O1, O2, O3> Observer for (O1, O2, O3)
 where
-    T1: Observation,
-    T2: Observation,
-    T3: Observation,
+    O1: Observer,
+    O2: Observer,
+    O3: Observer,
 {
-    fn start(&self) {
+    fn start(&mut self) {
         self.0.start();
         self.1.start();
         self.2.start();
+    }
+
+    fn stop(&mut self) {
+        self.2.stop();
+        self.1.stop();
+        self.0.stop();
+    }
+
+    fn record<T>(&mut self, output: &T) {
+        self.0.record(output);
+        self.1.record(output);
+        self.2.record(output);
     }
 }

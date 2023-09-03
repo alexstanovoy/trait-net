@@ -1,6 +1,7 @@
 use super::{Decision, Policy};
-use core::{ops::Range, time::Duration};
+use std::time::Duration;
 
+#[derive(Clone, Copy, Debug)]
 pub struct Once;
 
 impl Once {
@@ -15,17 +16,15 @@ impl<Response> Policy<Response, Response> for Once {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct RetryOnError {
-    counter: Range<usize>,
+    retry_count: usize,
     delay: Duration,
 }
 
 impl RetryOnError {
     pub fn new(retry_count: usize, delay: Duration) -> Self {
-        Self {
-            counter: 0..retry_count,
-            delay,
-        }
+        Self { retry_count, delay }
     }
 }
 
@@ -33,7 +32,8 @@ impl<Response, Error> Policy<Result<Response, Error>, Result<Response, Error>> f
     fn decide(&mut self, response: Result<Response, Error>) -> Decision<Result<Response, Error>> {
         if response.is_ok() {
             Decision::Break(response)
-        } else if self.counter.next().is_some() {
+        } else if self.retry_count > 0 {
+            self.retry_count -= 1;
             Decision::Retry(self.delay)
         } else {
             Decision::Break(response)

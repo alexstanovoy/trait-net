@@ -2,7 +2,7 @@ mod stream;
 
 pub mod policy;
 
-use core::time::Duration;
+use std::time::Duration;
 use stream::Stream;
 use tokio::time::sleep;
 
@@ -15,7 +15,7 @@ pub trait Policy<Response, TransformedResponse> {
     fn decide(&mut self, response: Response) -> Decision<TransformedResponse>;
 }
 
-pub(crate) async fn retry<S, P, Req, Res>(stream: S, mut policy: P, request: Req) -> Res
+pub async fn tokio_retry<S, P, Req, Res>(stream: S, mut policy: P, request: Req) -> Res
 where
     S: Stream<Req>,
     P: Policy<<S as Stream<Req>>::Response, Res>,
