@@ -1,15 +1,7 @@
-use prometheus::IntCounter;
-use std::ops::Deref;
+use prometheus::{IntCounter, core::{Collector, Desc}, proto::MetricFamily};
 
+#[derive(Clone)]
 pub struct Alive(IntCounter);
-
-impl Deref for Alive {
-    type Target = IntCounter;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
 
 impl Alive {
     pub fn start<S1: Into<String>, S2: Into<String>>(
@@ -19,5 +11,15 @@ impl Alive {
         let counter = IntCounter::new(name, help)?;
         counter.inc();
         Ok(Self(counter))
+    }
+}
+
+impl Collector for Alive {
+    fn desc(&self) -> Vec<&Desc> {
+        self.0.desc()
+    }
+
+    fn collect(&self) -> Vec<MetricFamily> {
+        self.0.collect()
     }
 }

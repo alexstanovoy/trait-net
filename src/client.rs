@@ -12,14 +12,14 @@ pub trait ExecuteQuery<Request> {
         Request: Clone + Send + Sync + 'async_trait,
         Self::Response: Send;
 
-    #[cfg(not(any(tokio)))]
+    #[cfg(not(feature = "tokio"))]
     async fn query_with_policy<Policy>(&self, request: Request, policy: Policy) -> Self::Response
     where
         Request: Clone + Send + Sync + 'async_trait,
         Policy: RetryPolicy<Self::Response, Self::Response> + Send,
         Self::Response: Send;
 
-    #[cfg(tokio)]
+    #[cfg(feature = "tokio")]
     async fn query_with_policy<Policy>(&self, request: Request, policy: Policy) -> Self::Response
     where
         Request: Clone + Send + Sync + 'async_trait,

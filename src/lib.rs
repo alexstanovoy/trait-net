@@ -1,3 +1,3 @@
 pub mod client;
-pub mod metric;
+pub mod metrics;
 pub mod retry;

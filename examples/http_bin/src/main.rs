@@ -67,11 +67,7 @@ impl ExecuteQuery<PostRequest> for HttpBinClient {
         'life0: 'async_trait,
         Self: 'async_trait,
     {
-        Box::pin(tokio_retry(
-            |req| self.query(req),
-            RetryOnError::new(2, Duration::from_millis(100)),
-            (request,),
-        ))
+        self.query_with_policy(request, RetryOnError::new(2, Duration::from_millis(100)))
     }
 }
 
@@ -107,11 +103,7 @@ impl ExecuteQuery<UnavailableRequest> for HttpBinClient {
         'life0: 'async_trait,
         Self: 'async_trait,
     {
-        Box::pin(tokio_retry(
-            |req| self.query(req),
-            RetryOnError::new(2, Duration::from_secs(1)),
-            (request,),
-        ))
+        self.query_with_policy(request, RetryOnError::new(2, Duration::from_millis(100)))
     }
 }
 

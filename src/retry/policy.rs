@@ -18,13 +18,16 @@ impl<Response> Policy<Response, Response> for Once {
 
 #[derive(Clone, Copy, Debug)]
 pub struct RetryOnError {
-    retry_count: usize,
+    retry_attempts: usize,
     delay: Duration,
 }
 
 impl RetryOnError {
-    pub fn new(retry_count: usize, delay: Duration) -> Self {
-        Self { retry_count, delay }
+    pub fn new(retry_attempts: usize, delay: Duration) -> Self {
+        Self {
+            retry_attempts,
+            delay,
+        }
     }
 }
 
@@ -32,8 +35,8 @@ impl<Response, Error> Policy<Result<Response, Error>, Result<Response, Error>> f
     fn decide(&mut self, response: Result<Response, Error>) -> Decision<Result<Response, Error>> {
         if response.is_ok() {
             Decision::Break(response)
-        } else if self.retry_count > 0 {
-            self.retry_count -= 1;
+        } else if self.retry_attempts > 0 {
+            self.retry_attempts -= 1;
             Decision::Retry(self.delay)
         } else {
             Decision::Break(response)

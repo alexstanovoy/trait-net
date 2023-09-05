@@ -1,17 +1,13 @@
 use prometheus::{core::{Collector, Desc}, proto::MetricFamily, Gauge};
-use std::{time::Instant, ops::Deref};
+use std::{time::Instant, sync::Arc};
 
-pub struct Uptime {
+#[derive(Clone)]
+pub struct Uptime(Arc<UptimeData>);
+
+#[derive(Clone)]
+struct UptimeData {
     gauge: Gauge,
     start_time: Instant,
-}
-
-impl Deref for Uptime {
-    type Target = Gauge;
-
-    fn deref(&self) -> &Self::Target {
-        &self.gauge
-    }
 }
 
 impl Uptime {
@@ -19,24 +15,20 @@ impl Uptime {
         name: S1,
         help: S2,
     ) -> prometheus::Result<Self> {
-        Ok(Self {
+        Ok(Self(Arc::new(UptimeData {
             gauge: Gauge::new(name, help)?,
             start_time: Instant::now(),
-        })
-    }
-
-    pub fn reset(&mut self) {
-        self.start_time = Instant::now();
+        })))
     }
 }
 
 impl Collector for Uptime {
     fn desc(&self) -> Vec<&Desc> {
-        self.gauge.desc()
+        self.0.gauge.desc()
     }
 
     fn collect(&self) -> Vec<MetricFamily> {
-        self.gauge.set(self.start_time.elapsed().as_millis() as f64);
-        self.gauge.collect()
+        self.0.gauge.set(self.0.start_time.elapsed().as_millis() as f64);
+        self.0.gauge.collect()
     }
 }
