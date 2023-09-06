@@ -1,4 +1,8 @@
-use prometheus::{IntCounter, core::{Collector, Desc}, proto::MetricFamily};
+use prometheus::{
+    core::{Collector, Desc},
+    proto::MetricFamily,
+    IntCounter,
+};
 
 #[derive(Clone)]
 pub struct Alive(IntCounter);

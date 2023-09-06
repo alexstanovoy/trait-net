@@ -1,5 +1,9 @@
-use prometheus::{core::{Collector, Desc}, proto::MetricFamily, Gauge};
-use std::{time::Instant, sync::Arc};
+use prometheus::{
+    core::{Collector, Desc},
+    proto::MetricFamily,
+    Gauge,
+};
+use std::{sync::Arc, time::Instant};
 
 #[derive(Clone)]
 pub struct Uptime(Arc<UptimeData>);
@@ -28,7 +32,9 @@ impl Collector for Uptime {
     }
 
     fn collect(&self) -> Vec<MetricFamily> {
-        self.0.gauge.set(self.0.start_time.elapsed().as_millis() as f64);
+        self.0
+            .gauge
+            .set(self.0.start_time.elapsed().as_millis() as f64);
         self.0.gauge.collect()
     }
 }

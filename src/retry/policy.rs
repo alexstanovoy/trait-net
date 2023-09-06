@@ -1,7 +1,7 @@
 use super::{Decision, Policy};
 use std::time::Duration;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Once;
 
 impl Once {

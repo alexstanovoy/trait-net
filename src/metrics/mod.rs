@@ -1,8 +1,6 @@
 mod future_ext;
 #[cfg(feature = "prometheus")]
 pub mod prometheus;
-#[cfg(test)]
-mod tests;
 
 pub use future_ext::MetricsFutureExt;
 

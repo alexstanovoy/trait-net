@@ -1,7 +1,10 @@
-
-use crate::metrics::{StatusObserver, AsStatusLabel};
+use crate::metrics::{AsStatusLabel, StatusObserver};
+use prometheus::{
+    core::{Collector, Desc},
+    proto::MetricFamily,
+    IntGaugeVec, Opts,
+};
 use std::iter::once_with;
-use prometheus::{IntGaugeVec, Opts, core::{Collector, Desc}, proto::MetricFamily};
 
 #[derive(Clone)]
 pub struct Status(IntGaugeVec);

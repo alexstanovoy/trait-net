@@ -1,10 +1,9 @@
-mod stream;
-
 pub mod policy;
+pub mod stream;
+
+pub use stream::Stream;
 
 use std::time::Duration;
-use stream::Stream;
-use tokio::time::sleep;
 
 pub enum Decision<Response> {
     Retry(Duration),
@@ -15,6 +14,7 @@ pub trait Policy<Response, TransformedResponse> {
     fn decide(&mut self, response: Response) -> Decision<TransformedResponse>;
 }
 
+#[cfg(feature = "tokio")]
 pub async fn tokio_retry<S, P, Req, Res>(stream: S, mut policy: P, request: Req) -> Res
 where
     S: Stream<Req>,
@@ -23,7 +23,7 @@ where
 {
     loop {
         match policy.decide(stream.next(request.clone()).await) {
-            Decision::Retry(delay) => sleep(delay).await,
+            Decision::Retry(delay) => tokio::time::sleep(delay).await,
             Decision::Break(response) => break response,
         }
     }

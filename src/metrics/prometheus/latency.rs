@@ -1,9 +1,13 @@
 use crate::metrics::ScopedObserver;
-use prometheus::{Histogram, HistogramOpts, HistogramVec, core::{Collector, Desc}, proto::MetricFamily};
+use prometheus::{
+    core::{AtomicF64, Collector, Desc, GenericGauge},
+    proto::MetricFamily,
+    GaugeVec, Opts,
+};
 use std::{cell::OnceCell, time::Instant};
 
 #[derive(Clone)]
-pub struct Latency(HistogramVec);
+pub struct Latency(GaugeVec);
 
 impl Latency {
     pub fn new<S1: Into<String>, S2: Into<String>>(
@@ -11,15 +15,12 @@ impl Latency {
         help: S2,
         label_names: &[&str],
     ) -> prometheus::Result<Self> {
-        Ok(Self(HistogramVec::new(
-            HistogramOpts::new(name, help),
-            label_names,
-        )?))
+        Ok(Self(GaugeVec::new(Opts::new(name, help), label_names)?))
     }
 
     pub fn observe(&self, labels: &[&str]) -> LatencyObserver {
         LatencyObserver {
-            hist: self.0.with_label_values(labels),
+            gauge: self.0.with_label_values(labels),
             timer: OnceCell::new(),
         }
     }
@@ -36,7 +37,7 @@ impl Collector for Latency {
 }
 
 pub struct LatencyObserver {
-    hist: Histogram,
+    gauge: GenericGauge<AtomicF64>,
     timer: OnceCell<Instant>,
 }
 
@@ -48,6 +49,6 @@ impl ScopedObserver for LatencyObserver {
     fn stop(&self) {
         self.timer
             .get()
-            .map(|t| self.hist.observe(t.elapsed().as_secs_f64()));
+            .map(|t| self.gauge.add(t.elapsed().as_secs_f64()));
     }
 }

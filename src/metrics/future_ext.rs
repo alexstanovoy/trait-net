@@ -1,4 +1,4 @@
-use super::{ScopedObserver, StatusObserver, AsStatusLabel};
+use super::{AsStatusLabel, ScopedObserver, StatusObserver};
 use std::{
     future::Future,
     pin::Pin,
@@ -72,10 +72,7 @@ pub struct RecordFuture<O, F> {
 
 impl<O, F> RecordFuture<O, F> {
     fn new(observer: O, inner: F) -> Self {
-        Self {
-            observer,
-            inner,
-        }
+        Self { observer, inner }
     }
 }
 
@@ -95,7 +92,7 @@ where
             Poll::Ready(output) => {
                 this.observer.record(&output);
                 Poll::Ready(output)
-            },
+            }
             Poll::Pending => Poll::Pending,
         }
     }

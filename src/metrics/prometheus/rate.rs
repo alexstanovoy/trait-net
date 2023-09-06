@@ -1,7 +1,8 @@
 use crate::metrics::ScopedObserver;
 use prometheus::{
-    core::{AtomicI64, GenericGauge, Collector, Desc},
-    IntGaugeVec, Opts, proto::MetricFamily,
+    core::{AtomicI64, Collector, Desc, GenericGauge},
+    proto::MetricFamily,
+    IntGaugeVec, Opts,
 };
 
 #[derive(Clone)]
