@@ -6,8 +6,10 @@ readme = "README.md"
 version = "0.1.0"
 authors = ["Alexander Stanovoy <alex.stanovoy@gmail.com>"]
 edition = "2021"
+documentation = "https://docs.rs/trait-net"
+homepage = "https://github.com/alexstanovoy/trait-net"
 repository = "https://github.com/alexstanovoy/trait-net"
-keywords = ["web", "net", "trait", "http", "client", "tokio", "retry", "metrics"]
+keywords = ["net", "trait", "net", "web", "http", "client", "metrics"]
 
 [dependencies]
 async-trait = "0.1"
