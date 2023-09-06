@@ -9,7 +9,7 @@ edition = "2021"
 documentation = "https://docs.rs/trait-net"
 homepage = "https://github.com/alexstanovoy/trait-net"
 repository = "https://github.com/alexstanovoy/trait-net"
-keywords = ["net", "trait", "net", "web", "http", "client", "metrics"]
+keywords = ["net", "trait", "metrics"]
 
 [dependencies]
 async-trait = "0.1"
