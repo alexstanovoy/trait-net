@@ -1,18 +1,15 @@
 use prometheus::{
     core::{Collector, Desc},
     proto::MetricFamily,
-    IntCounter,
+    IntCounter, Opts,
 };
 
 #[derive(Clone)]
 pub struct Alive(IntCounter);
 
 impl Alive {
-    pub fn start<S1: Into<String>, S2: Into<String>>(
-        name: S1,
-        help: S2,
-    ) -> prometheus::Result<Self> {
-        let counter = IntCounter::new(name, help)?;
+    pub fn new(opts: Opts) -> prometheus::Result<Self> {
+        let counter = IntCounter::with_opts(opts)?;
         counter.inc();
         Ok(Self(counter))
     }

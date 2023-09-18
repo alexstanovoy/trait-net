@@ -1,7 +1,7 @@
 use prometheus::{
     core::{Collector, Desc},
     proto::MetricFamily,
-    Gauge,
+    Gauge, Opts,
 };
 use std::{sync::Arc, time::Instant};
 
@@ -15,12 +15,9 @@ struct UptimeData {
 }
 
 impl Uptime {
-    pub fn start<S1: Into<String>, S2: Into<String>>(
-        name: S1,
-        help: S2,
-    ) -> prometheus::Result<Self> {
+    pub fn new(opts: Opts) -> prometheus::Result<Self> {
         Ok(Self(Arc::new(UptimeData {
-            gauge: Gauge::new(name, help)?,
+            gauge: Gauge::with_opts(opts)?,
             start_time: Instant::now(),
         })))
     }
@@ -34,7 +31,7 @@ impl Collector for Uptime {
     fn collect(&self) -> Vec<MetricFamily> {
         self.0
             .gauge
-            .set(self.0.start_time.elapsed().as_millis() as f64);
+            .set(self.0.start_time.elapsed().as_secs_f64() as f64);
         self.0.gauge.collect()
     }
 }

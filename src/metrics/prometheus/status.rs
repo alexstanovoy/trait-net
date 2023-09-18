@@ -10,9 +10,8 @@ use std::iter::once_with;
 pub struct Status(IntGaugeVec);
 
 impl Status {
-    pub fn new<S1: Into<String>, S2: Into<String>>(
-        name: S1,
-        help: S2,
+    pub fn new(
+        opts: Opts,
         label_names: &[&str],
         status_label_name: &str,
     ) -> prometheus::Result<Self> {
@@ -21,7 +20,7 @@ impl Status {
             .map(|s| *s)
             .chain(once_with(|| status_label_name))
             .collect();
-        Ok(Self(IntGaugeVec::new(Opts::new(name, help), &labels)?))
+        Ok(Self(IntGaugeVec::new(opts, &labels)?))
     }
 
     pub fn observe(&self, labels: &[&str]) -> StatusObserverGuard {

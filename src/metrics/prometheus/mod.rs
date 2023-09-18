@@ -4,6 +4,9 @@ pub mod rate;
 pub mod status;
 pub mod uptime;
 
+#[cfg(test)]
+mod tests;
+
 pub use alive::Alive;
 pub use latency::Latency;
 pub use rate::Rate;
