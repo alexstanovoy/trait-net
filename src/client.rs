@@ -1,31 +1,27 @@
 use crate::retry::Policy as RetryPolicy;
-use async_trait::async_trait;
+use std::future::Future;
 
-#[async_trait]
 pub trait ExecuteQuery<Request> {
     type Response;
 
-    async fn query(&self, request: Request) -> Self::Response;
+    fn query(&self, request: Request) -> impl Future<Output = Self::Response> + Send;
 
-    async fn query_with_retry(&self, request: Request) -> Self::Response
+    fn query_with_retry(&self, request: Request) -> impl Future<Output = Self::Response> + Send
     where
-        Request: Clone + Send + Sync + 'async_trait,
+        Request: Clone,
         Self::Response: Send;
 
-    #[cfg(not(feature = "tokio"))]
-    async fn query_with_policy<Policy>(&self, request: Request, policy: Policy) -> Self::Response
+    fn query_with_policy<Policy>(
+        &self,
+        request: Request,
+        policy: Policy,
+    ) -> impl Future<Output = Self::Response> + Send
     where
-        Request: Clone + Send + Sync + 'async_trait,
-        Policy: RetryPolicy<Self::Response, Self::Response> + Send,
-        Self::Response: Send;
-
-    #[cfg(feature = "tokio")]
-    async fn query_with_policy<Policy>(&self, request: Request, policy: Policy) -> Self::Response
-    where
-        Request: Clone + Send + Sync + 'async_trait,
-        Policy: RetryPolicy<Self::Response, Self::Response> + Send,
+        Request: Clone + Send,
+        Policy: RetryPolicy<Self::Response> + Send,
         Self::Response: Send,
+        Self: Sync,
     {
-        crate::retry::tokio_retry(|req| self.query(req), policy, (request,)).await
+        async move { policy.retry(|req| self.query(req), (request,)).await }
     }
 }

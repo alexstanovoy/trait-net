@@ -1,9 +1,0 @@
-[package]
-name = "http-bin"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-trait-net = { path = "../..", features = ["tokio", "prometheus"] }
-tokio = { version = "1.32", features = ["net", "time", "rt-multi-thread", "macros"] }
-prometheus = { version = "0.13" }

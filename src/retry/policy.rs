@@ -10,9 +10,9 @@ impl Once {
     }
 }
 
-impl<Response> Policy<Response, Response> for Once {
-    fn decide(&mut self, response: Response) -> Decision<Response> {
-        Decision::Break(response)
+impl<Response> Policy<Response> for Once {
+    fn decide(&mut self, _: &Response) -> Decision {
+        Decision::Break
     }
 }
 
@@ -31,15 +31,15 @@ impl RetryOnError {
     }
 }
 
-impl<Response, Error> Policy<Result<Response, Error>, Result<Response, Error>> for RetryOnError {
-    fn decide(&mut self, response: Result<Response, Error>) -> Decision<Result<Response, Error>> {
+impl<Response, Error> Policy<Result<Response, Error>> for RetryOnError {
+    fn decide(&mut self, response: &Result<Response, Error>) -> Decision {
         if response.is_ok() {
-            Decision::Break(response)
+            Decision::Break
         } else if self.retry_attempts > 0 {
             self.retry_attempts -= 1;
             Decision::Retry(self.delay)
         } else {
-            Decision::Break(response)
+            Decision::Break
         }
     }
 }

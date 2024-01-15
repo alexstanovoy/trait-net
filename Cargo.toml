@@ -3,7 +3,7 @@ name = "trait-net"
 description = "A collection of traits for client libraries for reducing boilerplate"
 license = "MIT"
 readme = "README.md"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Alexander Stanovoy <alex.stanovoy@gmail.com>"]
 edition = "2021"
 documentation = "https://docs.rs/trait-net"
@@ -12,15 +12,17 @@ repository = "https://github.com/alexstanovoy/trait-net"
 keywords = ["net", "trait", "metrics"]
 
 [dependencies]
-async-trait = "0.1"
-tokio = { version = "1.32", features = ["time"], optional = true }
+tokio = { version = "1.35", features = ["time"] }
 prometheus = { version = "0.13", optional = true }
 
 [dev-dependencies]
-tokio = { version = "1.32", features = ["net", "time", "rt-multi-thread", "macros"] }
+tokio = { version = "1.35", features = ["net", "time", "rt-multi-thread", "macros"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 
 [features]
-tokio = ["dep:tokio"]
 prometheus = ["dep:prometheus"]
+
+[[example]]
+name = "http_bin"
+path = "examples/http_bin.rs"
