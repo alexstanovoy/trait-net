@@ -23,7 +23,7 @@ pub struct PostRequest {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct PostResponse {
-    data: String,
+    _data: String,
 }
 
 pub struct RateMetric {}

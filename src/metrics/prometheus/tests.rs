@@ -1,21 +1,23 @@
-use super::{Alive, Rate, Uptime};
+use super::{Constant, Elapsed, Rate};
 use crate::metrics::MetricsFutureExt;
 use prometheus::{core::Collector, opts};
 use std::time::Duration;
 use tokio::time::sleep;
 
 #[test]
-fn alive() {
-    let alive = Alive::new(opts!("alive", "Total uptime")).unwrap();
+fn constant() {
+    let constant = Constant::new(opts!("alive", "Total uptime"), 1).unwrap();
     assert_eq!(
-        alive.collect()[0].get_metric()[0].get_counter().get_value(),
+        constant.collect()[0].get_metric()[0]
+            .get_counter()
+            .get_value(),
         1.0
     );
 }
 
 #[tokio::test]
 async fn uptime() {
-    let uptime = Uptime::new(opts!("alive", "Total uptime")).unwrap();
+    let uptime = Elapsed::new(opts!("alive", "Total uptime")).unwrap();
     assert!((0.0..0.1).contains(&uptime.collect()[0].get_metric()[0].get_gauge().get_value()));
     sleep(Duration::from_millis(100)).await;
     assert!((0.1..0.2).contains(&uptime.collect()[0].get_metric()[0].get_gauge().get_value()));
@@ -48,7 +50,7 @@ async fn rate() {
             );
             sleep(Duration::from_millis(100)).await;
         }
-        .monitor(o)
+        .observe(o)
     })
     .await
     .unwrap();

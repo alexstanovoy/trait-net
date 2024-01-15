@@ -1,4 +1,4 @@
-use crate::metrics::{AsStatusLabel, StatusObserver};
+use crate::metrics::{AsStatusLabel, Observer};
 use prometheus::{
     core::{Collector, Desc},
     proto::MetricFamily,
@@ -46,8 +46,12 @@ pub struct StatusObserverGuard {
     labels: Vec<String>,
 }
 
-impl StatusObserver for StatusObserverGuard {
-    fn record<Output: AsStatusLabel>(&self, output: &Output) {
+impl<Out: AsStatusLabel> Observer<Out> for StatusObserverGuard {
+    fn start(&mut self) {}
+
+    fn stop(&mut self) {}
+
+    fn record(&mut self, output: &Out) {
         let status_label_name = output.as_status_label();
         let labels: Vec<_> = self
             .labels

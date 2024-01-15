@@ -5,17 +5,17 @@ use prometheus::{
 };
 
 #[derive(Clone)]
-pub struct Alive(IntCounter);
+pub struct Constant(IntCounter);
 
-impl Alive {
-    pub fn new(opts: Opts) -> prometheus::Result<Self> {
+impl Constant {
+    pub fn new(opts: Opts, constant: u64) -> prometheus::Result<Self> {
         let counter = IntCounter::with_opts(opts)?;
-        counter.inc();
+        counter.inc_by(constant);
         Ok(Self(counter))
     }
 }
 
-impl Collector for Alive {
+impl Collector for Constant {
     fn desc(&self) -> Vec<&Desc> {
         self.0.desc()
     }

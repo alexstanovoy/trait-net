@@ -1,10 +1,10 @@
-use crate::metrics::ScopedObserver;
+use crate::metrics::Observer;
 use prometheus::{
     core::{Collector, Desc},
     proto::MetricFamily,
     Histogram, HistogramOpts, HistogramVec,
 };
-use std::{cell::OnceCell, time::Instant};
+use std::time::Instant;
 
 #[derive(Clone)]
 pub struct Latency(HistogramVec);
@@ -17,7 +17,7 @@ impl Latency {
     pub fn observe(&self, labels: &[&str]) -> LatencyObserver {
         LatencyObserver {
             hist: self.0.with_label_values(labels),
-            timer: OnceCell::new(),
+            instant: None,
         }
     }
 }
@@ -34,17 +34,18 @@ impl Collector for Latency {
 
 pub struct LatencyObserver {
     hist: Histogram,
-    timer: OnceCell<Instant>,
+    instant: Option<Instant>,
 }
 
-impl ScopedObserver for LatencyObserver {
-    fn start(&self) {
-        self.timer.get_or_init(|| Instant::now());
+impl<Out> Observer<Out> for LatencyObserver {
+    fn start(&mut self) {
+        self.instant = Some(Instant::now());
     }
 
-    fn stop(&self) {
-        self.timer
-            .get()
-            .map(|t| self.hist.observe(t.elapsed().as_secs_f64()));
+    fn stop(&mut self) {
+        self.instant
+            .map(|i| self.hist.observe(i.elapsed().as_secs_f64()));
     }
+
+    fn record(&mut self, output: &Out) {}
 }
