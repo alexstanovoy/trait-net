@@ -23,7 +23,8 @@ pub struct PostRequest {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct PostResponse {
-    _data: String,
+    #[allow(dead_code)]
+    data: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
