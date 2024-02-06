@@ -26,8 +26,6 @@ pub struct PostResponse {
     _data: String,
 }
 
-pub struct RateMetric {}
-
 #[derive(Clone, Debug, Serialize)]
 pub struct UnavailableRequest;
 
@@ -86,9 +84,9 @@ async fn main() {
         surname: "Bar".to_owned(),
     };
     let response = client.query(request).await;
-    println!("Response: {:?}", response);
+    println!("Response 1: {:?}", response);
 
     let request = UnavailableRequest;
     let response = client.query_with_retry(request).await;
-    println!("{:?}", response);
+    println!("Response 2: {:?}", response);
 }

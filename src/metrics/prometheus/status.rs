@@ -10,7 +10,11 @@ use std::iter::once_with;
 pub struct Status(IntGaugeVec);
 
 impl Status {
-    pub fn new(
+    pub fn new(opts: Opts, label_names: &[&str]) -> prometheus::Result<Self> {
+        Self::new_with(opts, label_names, "status")
+    }
+
+    pub fn new_with(
         opts: Opts,
         label_names: &[&str],
         status_label_name: &str,
@@ -47,11 +51,7 @@ pub struct StatusObserverGuard {
 }
 
 impl<Out: AsStatusLabel> Observer<Out> for StatusObserverGuard {
-    fn start(&mut self) {}
-
-    fn stop(&mut self) {}
-
-    fn record(&mut self, output: &Out) {
+    fn on_poll_ready(&mut self, output: &Out) {
         let status_label_name = output.as_status_label();
         let labels: Vec<_> = self
             .labels

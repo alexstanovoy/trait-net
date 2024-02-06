@@ -38,14 +38,13 @@ pub struct LatencyObserver {
 }
 
 impl<Out> Observer<Out> for LatencyObserver {
-    fn start(&mut self) {
+    fn on_first_poll(&mut self) {
         self.instant = Some(Instant::now());
     }
 
-    fn stop(&mut self) {
-        self.instant
-            .map(|i| self.hist.observe(i.elapsed().as_secs_f64()));
+    fn on_poll_ready(&mut self, _: &Out) {
+        if let Some(instant) = self.instant.take() {
+            self.hist.observe(instant.elapsed().as_secs_f64());
+        }
     }
-
-    fn record(&mut self, output: &Out) {}
 }

@@ -11,7 +11,7 @@ enum State {
     Ended,
 }
 
-pub struct ObserverFuture<Obs, Fut, Out>
+pub struct MeteredFuture<Obs, Fut, Out>
 where
     Obs: Observer<Out>,
     Fut: Future<Output = Out>,
@@ -21,7 +21,7 @@ where
     inner: Fut,
 }
 
-impl<Obs, Fut, Out> ObserverFuture<Obs, Fut, Out>
+impl<Obs, Fut, Out> MeteredFuture<Obs, Fut, Out>
 where
     Obs: Observer<Out>,
     Fut: Future<Output = Out>,
@@ -35,7 +35,7 @@ where
     }
 }
 
-impl<Obs, Fut, Out> Future for ObserverFuture<Obs, Fut, Out>
+impl<Obs, Fut, Out> Future for MeteredFuture<Obs, Fut, Out>
 where
     Obs: Observer<Out>,
     Fut: Future<Output = Out>,
@@ -47,13 +47,13 @@ where
         let this = unsafe { self.get_unchecked_mut() };
         let inner = unsafe { Pin::new_unchecked(&mut this.inner) };
         if matches!(this.state, State::Initialized) {
-            this.observer.start();
+            this.observer.on_first_poll();
             this.state = State::Started;
         }
         match inner.poll(cx) {
             Poll::Ready(output) => {
-                this.observer.record(&output);
-                this.observer.stop();
+                this.observer.on_poll_ready(&output);
+                this.observer.on_drop();
                 this.state = State::Ended;
                 Poll::Ready(output)
             }
@@ -62,14 +62,14 @@ where
     }
 }
 
-impl<Obs, Fut, Out> Drop for ObserverFuture<Obs, Fut, Out>
+impl<Obs, Fut, Out> Drop for MeteredFuture<Obs, Fut, Out>
 where
     Obs: Observer<Out>,
     Fut: Future<Output = Out>,
 {
     fn drop(&mut self) {
         if matches!(self.state, State::Started) {
-            self.observer.stop();
+            self.observer.on_drop();
             self.state = State::Ended;
         }
     }
@@ -79,8 +79,8 @@ pub trait MetricsFutureExt: Future + Sized {
     fn observe<Obs: Observer<Self::Output>>(
         self,
         observer: Obs,
-    ) -> ObserverFuture<Obs, Self, Self::Output> {
-        ObserverFuture::new(observer, self)
+    ) -> MeteredFuture<Obs, Self, Self::Output> {
+        MeteredFuture::new(observer, self)
     }
 }
 

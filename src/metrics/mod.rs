@@ -3,12 +3,12 @@ mod future_ext;
 #[cfg(feature = "prometheus")]
 pub mod prometheus;
 
-pub use future_ext::MetricsFutureExt;
+pub use future_ext::{MeteredFuture, MetricsFutureExt};
 
 pub trait Observer<Out> {
-    fn start(&mut self);
-    fn stop(&mut self);
-    fn record(&mut self, output: &Out);
+    fn on_first_poll(&mut self) {}
+    fn on_poll_ready(&mut self, _output: &Out) {}
+    fn on_drop(&mut self) {}
 }
 
 pub trait AsStatusLabel {
@@ -28,16 +28,16 @@ impl<Out, O1> Observer<Out> for (O1,)
 where
     O1: Observer<Out>,
 {
-    fn start(&mut self) {
-        self.0.start();
+    fn on_first_poll(&mut self) {
+        self.0.on_first_poll();
     }
 
-    fn stop(&mut self) {
-        self.0.stop();
+    fn on_poll_ready(&mut self, output: &Out) {
+        self.0.on_poll_ready(output);
     }
 
-    fn record(&mut self, output: &Out) {
-        self.0.record(output);
+    fn on_drop(&mut self) {
+        self.0.on_drop();
     }
 }
 
@@ -46,19 +46,19 @@ where
     O1: Observer<Out>,
     O2: Observer<Out>,
 {
-    fn start(&mut self) {
-        self.0.start();
-        self.1.start();
+    fn on_first_poll(&mut self) {
+        self.0.on_first_poll();
+        self.1.on_first_poll();
     }
 
-    fn stop(&mut self) {
-        self.0.stop();
-        self.1.stop();
+    fn on_poll_ready(&mut self, output: &Out) {
+        self.0.on_poll_ready(output);
+        self.1.on_poll_ready(output)
     }
 
-    fn record(&mut self, output: &Out) {
-        self.0.record(output);
-        self.1.record(output)
+    fn on_drop(&mut self) {
+        self.0.on_drop();
+        self.1.on_drop();
     }
 }
 
@@ -68,22 +68,22 @@ where
     O2: Observer<Out>,
     O3: Observer<Out>,
 {
-    fn start(&mut self) {
-        self.0.start();
-        self.1.start();
-        self.2.start();
+    fn on_first_poll(&mut self) {
+        self.0.on_first_poll();
+        self.1.on_first_poll();
+        self.2.on_first_poll();
     }
 
-    fn stop(&mut self) {
-        self.0.stop();
-        self.1.stop();
-        self.2.stop();
+    fn on_poll_ready(&mut self, output: &Out) {
+        self.0.on_poll_ready(output);
+        self.1.on_poll_ready(output);
+        self.2.on_poll_ready(output);
     }
 
-    fn record(&mut self, output: &Out) {
-        self.0.record(output);
-        self.1.record(output);
-        self.2.record(output);
+    fn on_drop(&mut self) {
+        self.0.on_drop();
+        self.1.on_drop();
+        self.2.on_drop();
     }
 }
 
@@ -94,24 +94,24 @@ where
     O3: Observer<Out>,
     O4: Observer<Out>,
 {
-    fn start(&mut self) {
-        self.0.start();
-        self.1.start();
-        self.2.start();
-        self.3.start();
+    fn on_first_poll(&mut self) {
+        self.0.on_first_poll();
+        self.1.on_first_poll();
+        self.2.on_first_poll();
+        self.3.on_first_poll();
     }
 
-    fn stop(&mut self) {
-        self.0.stop();
-        self.1.stop();
-        self.2.stop();
-        self.3.stop();
+    fn on_poll_ready(&mut self, output: &Out) {
+        self.0.on_poll_ready(output);
+        self.1.on_poll_ready(output);
+        self.2.on_poll_ready(output);
+        self.3.on_poll_ready(output);
     }
 
-    fn record(&mut self, output: &Out) {
-        self.0.record(output);
-        self.1.record(output);
-        self.2.record(output);
-        self.3.record(output);
+    fn on_drop(&mut self) {
+        self.0.on_drop();
+        self.1.on_drop();
+        self.2.on_drop();
+        self.3.on_drop();
     }
 }

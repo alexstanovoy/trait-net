@@ -1,4 +1,4 @@
-use super::{Constant, Elapsed, Rate};
+use super::{Constant, Elapsed, StartedCount};
 use crate::metrics::MetricsFutureExt;
 use prometheus::{core::Collector, opts};
 use std::time::Duration;
@@ -27,7 +27,7 @@ async fn uptime() {
 
 #[tokio::test]
 async fn rate() {
-    let rate = Rate::new(opts!("rate", "Request rate"), &[]).unwrap();
+    let rate = StartedCount::new(opts!("rate", "Request rate"), &[]).unwrap();
     let o = rate.observe(&[]);
     assert_eq!(
         rate.collect()[0].get_metric()[0].get_counter().get_value(),
