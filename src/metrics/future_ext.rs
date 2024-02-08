@@ -6,9 +6,8 @@ use std::{
 };
 
 enum State {
-    Initialized,
-    Started,
-    Ended,
+    NotStarted,
+    Polling,
 }
 
 pub struct MeteredFuture<Obs, Fut, Out>
@@ -28,7 +27,7 @@ where
 {
     fn new(observer: Obs, inner: Fut) -> Self {
         Self {
-            state: State::Initialized,
+            state: State::NotStarted,
             observer,
             inner,
         }
@@ -46,15 +45,13 @@ where
         // Safety: We're not moving both the inner future and the guard.
         let this = unsafe { self.get_unchecked_mut() };
         let inner = unsafe { Pin::new_unchecked(&mut this.inner) };
-        if matches!(this.state, State::Initialized) {
+        if matches!(this.state, State::NotStarted) {
             this.observer.on_first_poll();
-            this.state = State::Started;
+            this.state = State::Polling;
         }
         match inner.poll(cx) {
             Poll::Ready(output) => {
                 this.observer.on_poll_ready(&output);
-                this.observer.on_drop();
-                this.state = State::Ended;
                 Poll::Ready(output)
             }
             Poll::Pending => Poll::Pending,
@@ -68,10 +65,7 @@ where
     Fut: Future<Output = Out>,
 {
     fn drop(&mut self) {
-        if matches!(self.state, State::Started) {
-            self.observer.on_drop();
-            self.state = State::Ended;
-        }
+        self.observer.on_drop();
     }
 }
 

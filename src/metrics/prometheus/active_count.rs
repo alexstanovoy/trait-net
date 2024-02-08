@@ -13,8 +13,8 @@ impl ActiveCount {
         Ok(Self(IntGaugeVec::new(opts, label_names)?))
     }
 
-    pub fn observe(&self, labels: &[&str]) -> StartedCountObserver {
-        StartedCountObserver(self.0.with_label_values(labels))
+    pub fn observe(&self, labels: &[&str]) -> ActiveCountObserver {
+        ActiveCountObserver(self.0.with_label_values(labels))
     }
 }
 
@@ -28,9 +28,9 @@ impl Collector for ActiveCount {
     }
 }
 
-pub struct StartedCountObserver(GenericGauge<AtomicI64>);
+pub struct ActiveCountObserver(GenericGauge<AtomicI64>);
 
-impl<Out> Observer<Out> for StartedCountObserver {
+impl<Out> Observer<Out> for ActiveCountObserver {
     fn on_first_poll(&mut self) {
         self.0.inc();
     }
